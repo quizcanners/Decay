@@ -1,0 +1,136 @@
+void bloodphisics (int lvl)
+{
+int l,i;
+i=1;
+blpoint=bfirst[lvl].next;
+int movex;
+int movey;
+int camxtyle, camytyle;
+
+noBloodVacancyThisTurn=0;
+
+while (blpoint->next)
+{
+	
+camxtyle = - actcamx - (cameratylx - blpoint->tx)*tyleSize;
+jhx=blpoint->x + (camxtyle<<16);
+offx=jhx>>16;
+movex=abs((((offx-scrwid)*(blpoint->speedh)/dddstength)+blpoint->speedx))>>16;
+
+camytyle = - actcamy - (cameratyly - blpoint->ty)*tyleSize;
+jhy=blpoint->y + (camytyle<<16);
+offy=jhy>>16;
+movey=abs((((offy-scrhid)*(blpoint->speedh)/dddstength)+blpoint->speedy))>>16;
+
+//if ((offx+movex<scrwi) && (offx+movex>0) && (offy+movey<scrhi-10) && (offy+movey>10))
+//{
+
+//movex=abs(movex);
+//movey=abs(movey);
+
+ja=(movex ^ ((movex ^ movey) & -(movex < movey)));
+
+drtype = blpoint->type+1+(ja>5);
+
+//ji=ji>>16;
+ja=1 ^ ((1 ^ ja) & -(1 < ja));
+
+jspx=blpoint->speedx/ja;
+jspy=blpoint->speedy/ja;
+jsph=blpoint->speedh/ja;
+
+jhh=blpoint->h;
+
+while (ja)
+{
+ja--;
+jhh+=jsph;
+register int elevation=jhh/dddstength;
+
+jhx+=jspx;
+shortx=jhx>>16;
+shortx+=(((shortx-scrwid)*elevation)>>16);
+
+
+jhy+=jspy;
+shorty=jhy>>16;
+shorty+=(((shorty-scrhid)*elevation)>>16);
+
+Uint32 * __restrict dar;
+Uint32 * __restrict sar;
+int alpha, offsx=scrwi-image[drtype]->w, offsy=scrhi-image[drtype]->h;
+dar=(Uint32*)screen->pixels  + (shorty)*scrwi + shortx;
+sar=(Uint32*)image[drtype]->pixels;
+y=image[drtype]->h;
+x=image[drtype]->w;
+if ((shorty>0) && (shorty<offsy) && (shortx>0) && (shortx<offsx))
+while (y)
+{
+while (x)
+{
+register int idst = *dar;
+register int isrc = *sar;
+alpha=isrc>>24;
+*dar = ((RedMask & ((idst & RedMask) + ((int)(((int)(isrc & RedMask) - (int)(idst & RedMask)) * alpha) >>8))) | (GreenMask & ((idst & GreenMask) + ((int)(((int)(isrc & GreenMask) - (int)(idst & GreenMask)) * alpha) >>8))) | (BlueMask & ((idst & BlueMask) + ((int)(((int)(isrc & BlueMask) - (int)(idst & BlueMask)) * alpha) >>8))));
+dar++;
+sar++;
+x--;
+}
+dar+=offsx;
+y--;
+}
+else
+{
+blpoint->h=-accuracy;
+break;
+}
+}
+//}
+//else
+//blpoint->h=-1;
+
+blpoint->x+=blpoint->speedx;
+blpoint->y+=blpoint->speedy;
+blpoint->h+=blpoint->speedh;
+
+
+blpoint->speedh-=calc;
+blpoint->speedx*=blpoint->slowing;
+blpoint->speedy*=blpoint->slowing;
+
+if (blpoint->h>0)
+{
+hig=(int)(PEpoint->h>>16)/pixInPhis+matrdepth;
+	if (hig!=lvl)	
+	moveblood (blpoint, lvl);
+	else 
+		blpoint=blpoint->next;
+}
+else
+ {
+	 shorth=tyleSize*accuracy;
+	if (blpoint->x>shorth) {blpoint->x-=shorth;blpoint->tx+=1;}
+	if (blpoint->x<0) {blpoint->x+=shorth; blpoint->tx-=1;}
+	if (blpoint->y>shorth) {blpoint->y-=shorth; blpoint->ty+=1;}
+	if (blpoint->y<0) {blpoint->y+=shorth; blpoint->ty-=1;} 
+	theta = image[blpoint->type]->w;
+	theta/=(4);
+	for (fuck=0; fuck<blpoint->flooidness; fuck+=theta)
+	{
+		shortx=(blpoint->x+blpoint->speedx*fuck);
+		shortx=shortx>>16;
+		shorty=(blpoint->y+blpoint->speedy*fuck);
+		shorty=shorty>>16;
+tolendstyle (shortx, shorty, blpoint->type, tylextogrid(blpoint->tx)+1, tyleytogrid(blpoint->ty)+1);
+if (blpoint->x>(tyleSize-image[blpoint->type]->w)*accuracy) 
+tolendstyle (shortx-tyleSize, shorty, blpoint->type, tylextogrid(blpoint->tx+1)+1, tyleytogrid(blpoint->ty)+1);
+if (blpoint->y>(tyleSize-image[blpoint->type]->h)*accuracy) 
+tolendstyle (shortx, shorty-tyleSize, blpoint->type, tylextogrid(blpoint->tx)+1, tyleytogrid(blpoint->ty+1)+1);
+	}
+	removeblood(blpoint, lvl);
+}
+	
+
+}
+	
+}
